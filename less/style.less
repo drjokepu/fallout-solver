@@ -1,0 +1,96 @@
+@default-font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+@monospace-font-family: Menlo, Consolas, 'Courier New', monospace;
+@default-font-size: 11pt;
+@candidate-font-size: 14pt;
+@default-color: #202020;
+@invalid-match-color: #d0d0d0;
+@only-valid-match-color: #438a5e;
+@default-gap-size: 5px;
+@solver-width: 350px;
+
+body {
+	font-family: @default-font-family;
+	font-size: @default-font-size;
+	color: @default-color;
+}
+
+h1 {
+	font-weight: 100;
+}
+
+.app {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.solver {
+	display: flex;
+	flex-direction: column;
+	width: @solver-width;
+}
+
+.input-bar {
+	display: flex;
+	align-self: center;
+	align-items: center;
+	margin-bottom: 4 * @default-gap-size;
+	
+	&>label {
+		display: flex;
+		align-items: center;
+		
+		&>.input-bar-label {
+			margin-right: 2 * @default-gap-size;
+		}
+		
+		&>.input-bar-text-box {
+			text-transform: uppercase;
+		}
+	}
+}
+
+.candidates {
+	width: 100%;
+	
+	margin: 0;
+	list-style: none;
+	padding-left: 0;
+	
+	&>li {
+		display: flex;
+		align-items: center;
+		
+		transition: color 0.3s ease;
+		
+		&.match-value-invalid {
+			color: @invalid-match-color;
+		}
+		
+		&.match-value-only-valid {
+			color: @only-valid-match-color;
+		}
+		
+		&>span {
+			width: 40%;
+			flex-grow: 0;
+			flex-shrink: 0;
+			text-align: right;
+			margin-right: 2 * @default-gap-size;
+			
+			font-family: @monospace-font-family;
+			font-size: @candidate-font-size;
+		}
+		
+		.matches {
+			display: flex;
+			align-items: center;
+			
+			&>label {
+				display: flex;
+				align-items: center;
+				margin-right: 2 * @default-gap-size;
+			}
+		}
+	}
+}

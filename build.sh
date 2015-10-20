@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+echo TypeScript...
+./node_modules/typescript/bin/tsc -p tsx
+echo WebPack...
+node ./node_modules/webpack/bin/webpack.js --progress --colors $1

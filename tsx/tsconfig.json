@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"inlineSourceMap": true,
+		"jsx": "preserve",
+		"target": "ES6",
+		"outDir": "../jsx/"
+	},
+	"files": [
+		"index.tsx"
+	]
+}
