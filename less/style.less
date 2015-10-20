@@ -6,7 +6,7 @@
 @invalid-match-color: #d0d0d0;
 @only-valid-match-color: #438a5e;
 @default-gap-size: 5px;
-@solver-width: 350px;
+@solver-width: 500px;
 
 body {
 	font-family: @default-font-family;
@@ -72,7 +72,7 @@ h1 {
 		}
 		
 		&>span {
-			width: 40%;
+			width: 50%;
 			flex-grow: 0;
 			flex-shrink: 0;
 			text-align: right;
@@ -89,6 +89,7 @@ h1 {
 			&>label {
 				display: flex;
 				align-items: center;
+				margin-left: @default-gap-size / 2;
 				margin-right: 2 * @default-gap-size;
 			}
 		}
