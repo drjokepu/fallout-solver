@@ -27,7 +27,7 @@ h1 {
 .solver {
 	display: flex;
 	flex-direction: column;
-	width: @solver-width;
+	align-items: center;
 }
 
 .input-bar {
@@ -72,7 +72,6 @@ h1 {
 		}
 		
 		&>span {
-			width: 50%;
 			flex-grow: 0;
 			flex-shrink: 0;
 			text-align: right;
@@ -89,8 +88,11 @@ h1 {
 			&>label {
 				display: flex;
 				align-items: center;
-				margin-left: @default-gap-size / 2;
 				margin-right: 2 * @default-gap-size;
+				
+				&>span {
+					margin-left: @default-gap-size;
+				}
 			}
 		}
 	}
