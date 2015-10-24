@@ -36,8 +36,13 @@ class Store {
 	}
 	
 	getOnlyValid(): Candidate {
-		if (this.candidates.length <= 1) {
+		if (this.candidates.length < 1) {
 			return null;
+		}
+		
+		if (this.candidates.length === 1) {
+			const c0 = this.candidates[0];
+			return c0.matches === c0.value.length ? c0 : null;
 		}
 		
 		let firstValid: Candidate = null;
@@ -54,6 +59,14 @@ class Store {
 		return firstValid;
 	}
 	
+	getFixedCandidateLength(): number {
+		if (this.candidates.length < 1) {
+			return null;
+		} else {
+			return this.candidates[0].value.length;
+		}
+	}
+	
 	addCandidate(value: string): boolean {
 		if (this.candidates.find(c => c.value === value)) {
 			return false;
@@ -68,15 +81,28 @@ class Store {
 		return true;
 	}
 	
+	removeCandidate(id: number): void {
+		this.candidates = this.candidates.filter(c => c.id !== id);
+		this.emitUpdate();
+	}
+	
 	reset(): void {
 		this.candidates = [];
 		this.emitUpdate();
 	}
 	
-	updateCandidateMatches(id: number, matches: number) {
+	updateCandidateMatches(id: number, matches: number): void {
 		var candidate = this.candidates.find(c => c.id === id);
 		if (candidate) {
 			candidate.matches = matches;
+			this.emitUpdate();
+		}
+	}
+	
+	updateCandidateValue(id: number, value: string): void {
+		var candidate = this.candidates.find(c => c.id === id);
+		if (candidate) {
+			candidate.value = value;
 			this.emitUpdate();
 		}
 	}
@@ -174,7 +200,7 @@ var InputBar = React.createClass({
 	},
 	didTextBoxChange: function(ev: React.SyntheticEvent) {
 		this.setState({
-			text: (ev.target as HTMLInputElement).value
+			text: (ev.target as HTMLInputElement).value.toUpperCase()
 		});
 	},
 	didSubmit: function(ev: React.SyntheticEvent) {
@@ -186,20 +212,24 @@ var InputBar = React.createClass({
 				this.setState({ text: '' });
 			}
 		}
+		
+		this.refs.textBox.focus();
 	},
 	didReset: function() {
 		this.setState({ text: '' });
 		store.reset();
+		this.refs.textBox.focus();
 	},
 	render: function() {
 		return (
 			<form onSubmit={this.didSubmit} className="input-bar">
 				<label>
 					<span className="input-bar-label">Candidate:</span>
-					<input type="text" className="input-bar-text-box" value={this.state.text} autoFocus={true} onChange={this.didTextBoxChange} />
-					<button type="submit">Add</button>
-					<button type="button" onClick={this.didReset}>Reset</button>
+					<input type="text" className="input-bar-text-box" value={this.state.text} autoFocus={true}
+						onChange={this.didTextBoxChange} ref="textBox" />
 				</label>
+				<button type="submit">Add</button>
+				<button type="button" onClick={this.didReset}>Reset</button>
 			</form>
 		);
 	}
@@ -211,22 +241,106 @@ interface CandidateListItemProps {
 	onlyValid: boolean;
 }
 
-var CandidateListItem = React.createClass<CandidateListItemProps, any>({
+interface CandidateListItemState {
+	editMode: boolean;
+	needsFocus: boolean;
+	editValue: string;
+}
+
+var CandidateListItem = React.createClass<CandidateListItemProps, CandidateListItemState>({
+	getInitialState: function(): CandidateListItemState {
+		return {
+			editMode: false,
+			needsFocus: false,
+			editValue: null
+		} as CandidateListItemState;
+	},
+	componentDidUpdate: function() {
+		const state = this.state as CandidateListItemState;
+		if (state.editMode && state.needsFocus) {
+			this.refs.editCandidateValue.focus();
+			this.refs.editCandidateValue.select();
+			this.setState({
+				needsFocus: false
+			});
+		}
+	},
 	didChangeRadioButton: function(ev: React.SyntheticEvent) {
 		const props = this.props as CandidateListItemProps;
 		store.updateCandidateMatches(props.candidate.id, parseInt((ev.target as HTMLInputElement).value, 10));
 	},
+	didChangeEditValue: function(ev: React.SyntheticEvent) {
+		this.setState({
+			editValue: (ev.target as HTMLInputElement).value.toUpperCase()
+		});
+	},
+	didSubmitEditForm: function(ev: React.SyntheticEvent) {
+		ev.preventDefault();
+		const props = this.props as CandidateListItemProps;
+		const state = this.state as CandidateListItemState;
+		const fixedLength = store.getFixedCandidateLength();
+		
+		if (fixedLength === null || state.editValue.length === fixedLength) {
+			store.updateCandidateValue(props.candidate.id, state.editValue);
+			this.setState({
+				editMode: false,
+				needsFocus: false,
+				editValue: null
+			});
+		} else {
+			this.refs.editCandidateValue.focus();
+		}
+	},
+	didClickCancelEdit: function() {
+		this.setState({
+			editMode: false,
+			needsFocus: false,
+			editValue: null
+		});
+	},
+	didClickEdit: function() {
+		const props = this.props as CandidateListItemProps;
+		
+		this.setState({
+			editMode: true,
+			needsFocus: true,
+			editValue: props.candidate.value
+		});
+	},
+	didClickReset: function() {
+		const props = this.props as CandidateListItemProps;
+		store.updateCandidateMatches(props.candidate.id, null);
+	},
+	didClickRemove: function() {
+		const props = this.props as CandidateListItemProps;
+		store.removeCandidate(props.candidate.id);
+	},
 	render: function() {
 		const props = this.props as CandidateListItemProps;
+		const state = this.state as CandidateListItemState;
+		
+		if (state.editMode) {
+			return (
+				<li>
+					<form className="edit-candidate" onSubmit={this.didSubmitEditForm}>
+						<input type="text" value={state.editValue} className="edit-candidate-value" onChange={this.didChangeEditValue}
+							ref="editCandidateValue" />
+						<button type="submit">Update</button>
+						<button type="button" onClick={this.didClickCancelEdit}>Cancel</button>
+					</form>
+				</li>
+			);
+		}
+		
 		const valid = props.candidate.isValid(store.getCandidates());
 		const className = valid ? (props.onlyValid ? 'match-value-only-valid' : 'match-value-valid') : 'match-value-invalid';
 		
 		let radioButtons: JSX.Element[] = new Array(props.candidate.value.length);
-		for (let i = 0; i < props.candidate.value.length; i++) {
+		for (let i = 0; i <= props.candidate.value.length; i++) {
 			radioButtons[i] = (
 				<label key={i}>
-					<input type="radio" name="matches" value={i.toString()} disabled={!valid}
-						onChange={this.didChangeRadioButton} />
+					<input type="radio" name="matches" value={i.toString()}
+						checked={props.candidate.matches === i} onChange={this.didChangeRadioButton} />
 					<span>{i}</span>
 				</label>
 			);
@@ -237,11 +351,14 @@ var CandidateListItem = React.createClass<CandidateListItemProps, any>({
 				<span>{props.candidate.value}</span>
 				<form className="matches">
 					{radioButtons}
+					<button type="button" onClick={this.didClickEdit}>Edit</button>
+					<button type="button" onClick={this.didClickReset} disabled={props.candidate.matches === null}>Reset</button>
+					<button type="button" onClick={this.didClickRemove}>Remove</button>
 				</form>
 			</li>
 		);
 	}
-})
+});
 
 document.addEventListener('DOMContentLoaded', function () {
 	ReactDOM.render(<App />, document.getElementById('app'));
