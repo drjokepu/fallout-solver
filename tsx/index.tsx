@@ -3,8 +3,10 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+import dict from './dict';
+
 declare function require(name: string): any;
-require("!style!css!less!../less/style.less")
+require("!style!css!less!../less/style.less");
 
 class Store {
 	private candidates: Candidate[];
@@ -226,11 +228,33 @@ var InputBar = React.createClass({
 				<label>
 					<span className="input-bar-label">Candidate:</span>
 					<input type="text" className="input-bar-text-box" value={this.state.text} autoFocus={true}
-						onChange={this.didTextBoxChange} ref="textBox" />
+						onChange={this.didTextBoxChange} ref="textBox" list="suggestions" />
+					<Suggestions length={store.getFixedCandidateLength()} />
 				</label>
 				<button type="submit">Add</button>
 				<button type="button" onClick={this.didReset}>Reset</button>
 			</form>
+		);
+	}
+});
+
+interface SuggestionProps {
+	length: number
+}
+
+var Suggestions = React.createClass<SuggestionProps, any>({
+	shouldComponentUpdate(nextProps: SuggestionProps, nextState: any): boolean {
+		return (this.props as SuggestionProps).length !== nextProps.length;
+	},
+	render: function() {
+		const props = this.props as SuggestionProps;
+		const words = props.length === null ? dict : dict.filter(w => w.length === props.length);
+		const options = words.map(w => <option key={w} value={w}></option>);
+		
+		return (
+			<datalist id="suggestions">
+				{options}
+			</datalist>
 		);
 	}
 });
