@@ -27,7 +27,7 @@ h1 {
 .solver {
 	display: flex;
 	flex-direction: column;
-	width: @solver-width;
+	align-items: center;
 }
 
 .input-bar {
@@ -48,6 +48,10 @@ h1 {
 			text-transform: uppercase;
 		}
 	}
+	
+	&>button {
+		margin-left: @default-gap-size;
+	}
 }
 
 .candidates {
@@ -60,6 +64,7 @@ h1 {
 	&>li {
 		display: flex;
 		align-items: center;
+		justify-content: center;
 		
 		transition: color 0.3s ease;
 		
@@ -72,7 +77,6 @@ h1 {
 		}
 		
 		&>span {
-			width: 50%;
 			flex-grow: 0;
 			flex-shrink: 0;
 			text-align: right;
@@ -82,6 +86,15 @@ h1 {
 			font-size: @candidate-font-size;
 		}
 		
+		.edit-candidate {
+			display: flex;
+			align-items: center;
+			
+			.edit-candidate-value {
+				text-transform: uppercase;
+			}
+		}
+		
 		.matches {
 			display: flex;
 			align-items: center;
@@ -89,8 +102,15 @@ h1 {
 			&>label {
 				display: flex;
 				align-items: center;
-				margin-left: @default-gap-size / 2;
 				margin-right: 2 * @default-gap-size;
+				
+				&>span {
+					margin-left: @default-gap-size;
+				}
+			}
+			
+			&>button {
+				margin-left: @default-gap-size;
 			}
 		}
 	}

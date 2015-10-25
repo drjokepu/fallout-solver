@@ -6,6 +6,7 @@
 		"outDir": "../jsx/"
 	},
 	"files": [
+		"dict.ts",
 		"index.tsx"
 	]
 }
